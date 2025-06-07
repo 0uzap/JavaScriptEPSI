@@ -1,0 +1,40 @@
+@keyframes spinAndPulse {
+  0% {
+    transform: rotate(0deg) scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+    filter: brightness(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    filter: brightness(1);
+  }
+}
+
+#camion {
+  animation: spinAndPulse 3s linear infinite;
+  transform-origin: center center;
+  will-change: transform;
+  cursor: pointer;
+}
+
+#game-clickable-area.active {
+  transform: scale(1.2);
+  transition: transform 0.1s;
+}
+
+.golden-wheel {
+  z-index: 999;
+  transition: opacity 1s ease;
+  opacity: 0;
+}
+
+.fade-in {
+  opacity: 1;
+}
+
+.fade-out {
+  opacity: 0;
+}
