@@ -11,4 +11,5 @@ const game = new Game({
   camion: 0,
 });
 
+
 game.start();

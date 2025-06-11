@@ -20,7 +20,10 @@ export class Game {
 
   constructor(config) {
     // Récupère le nombre de camion de base via la configuration.
-    this.camion = config.camion;
+    this.camion = config.camion || 0;
+
+    this.passif = config.passif || 0;
+    this.shopItemsConfig = config.shopItems || [];
     // Récupère l'élément avec l'id game.
     this.gameElement = document.querySelector("#game");
     // Crée le composant ClickableArea qui gère la logique de la zone cliquable.
@@ -33,13 +36,58 @@ export class Game {
    this.shop = new Shop(
     this.gameElement,
     this.onPurchase,
-   ) ;
+   );
+
    this.randomSpawn = new RandomSpawn(
     this.gameElement,
     this.onGoldenCookieClick,
     () => this.passif // on passe une fonction pour que le passif reste à jour
   );
 
+  this.loadShopItems();
+
+  }
+
+  loadShopItems() {
+    this.shopItemsConfig.forEach(savedItem => {
+      const item = this.shop.items.find(i => i.name === savedItem.name);
+      if (item) {
+        item.quantite = savedItem.quantite;
+        item.prix = savedItem.prix;
+        this.passif += item.passif * item.quantite;
+        item.update();
+      }
+    });
+  }
+
+  save() {
+    const shopItemsToSave = this.shop.items.map(item => ({
+      name: item.name,
+      quantite: item.quantite,
+      prix: item.prix
+    }));
+
+    const saveData = {
+      camion: this.camion,
+      passif: this.passif,
+      shopItems: shopItemsToSave
+    };
+
+    console.log("Saving game data:", saveData),
+    localStorage.setItem("gameSave", JSON.stringify(saveData));
+  }
+
+  static load() {
+    const saved = localStorage.getItem("gameSave");
+    if (saved) {
+      return JSON.parse(saved);
+    } else {
+      return {
+        camion: 0,
+        passif: 0,
+        shopItems: []
+      };
+    }
   }
 
   // Lance le jeu
@@ -49,7 +97,8 @@ export class Game {
         this.camion += this.passif;
         window.requestAnimationFrame(() => {
             this.updateScore();
-        })
+        });
+        this.save()
     }, 1000
     );
 
@@ -89,6 +138,7 @@ export class Game {
     window.requestAnimationFrame(() => {
       this.updateScore();
     });
+    this.save();
   };
 
   onPurchase = (item) => {
@@ -99,7 +149,8 @@ export class Game {
         item.prix = 10 + item.quantite * 3;
         this.passif += item.passif;
 
-         item.update();
+        item.update();
+        this.save();
     }   
   }
 
